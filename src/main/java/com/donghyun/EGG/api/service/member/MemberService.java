@@ -1,4 +1,4 @@
-package com.donghyun.EGG.api.service;
+package com.donghyun.EGG.api.service.member;
 
 import com.donghyun.EGG.domain.member.Member;
 import com.donghyun.EGG.domain.member.repository.MemberRepository;

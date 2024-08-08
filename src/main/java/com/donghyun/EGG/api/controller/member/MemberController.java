@@ -1,6 +1,6 @@
-package com.donghyun.EGG.api.controller;
+package com.donghyun.EGG.api.controller.member;
 
-import com.donghyun.EGG.api.service.MemberService;
+import com.donghyun.EGG.api.service.member.MemberService;
 import com.donghyun.EGG.security.KisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
