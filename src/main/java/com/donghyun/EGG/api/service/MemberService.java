@@ -21,7 +21,7 @@ public class MemberService {
 
         String email = jsonObject.getString("email");
         if(memberRepository.existsByEmail(email)) {
-            log.debug("이전에 네이버 소셜로그인했던 이메일 입니다.: {}", email);
+            log.debug("{} :이전에 네이버 소셜로그인했던 이메일 입니다.", email);
             return memberRepository.findByEmail(email).getId();
         }
 

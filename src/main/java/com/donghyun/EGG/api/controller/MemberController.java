@@ -1,6 +1,7 @@
 package com.donghyun.EGG.api.controller;
 
 import com.donghyun.EGG.api.service.MemberService;
+import com.donghyun.EGG.security.KisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,12 @@ public class MemberController {
     private String clientSecret;
 
     private final MemberService memberService;
+    private final KisUtil kisUtil;
 
-    @GetMapping
-    public String test() {
-        log.debug("in");
-        return "1234";
+    @GetMapping("/kis")
+    public String test() throws IOException, JSONException {
+        String accessToken = kisUtil.generateKisToken();
+        return accessToken;
     }
 
     @GetMapping("/naverlogin")
