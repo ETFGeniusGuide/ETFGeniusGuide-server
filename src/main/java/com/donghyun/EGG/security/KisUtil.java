@@ -1,5 +1,6 @@
 package com.donghyun.EGG.security;
 
+import com.donghyun.EGG.api.service.stock.dto.StockDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 @Slf4j
@@ -25,6 +27,7 @@ public class KisUtil {
 
     @Value("${PROD}")
     private String prod;
+
 
     public String generateKisToken() throws IOException, JSONException {
         String apiURL = prod+"/oauth2/tokenP";
@@ -71,6 +74,45 @@ public class KisUtil {
         log.debug("{}: access_token", accessToken);
 
         return accessToken;
+    }
+
+    public String loadStockInfo(StockDto stockDto) throws IOException, JSONException {
+        String apiUrl = prod + "/uapi/domestic-stock/v1/quotations/search-stock-info?PRDT_TYPE_CD=300";
+        apiUrl += "&PDNO=" + stockDto.getPdno();
+
+        BufferedReader br;
+
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+
+            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccess_token());
+            con.setRequestProperty("appkey", prodAppkey);
+            con.setRequestProperty("appsecret", prodAppSecret);
+            con.setRequestProperty("tr_id", "CTPF1002R");
+            con.setRequestProperty("custtype", "P");
+
+            int responseCode = con.getResponseCode();
+
+            if(responseCode == 200) {
+                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            }
+            else {
+                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONObject response = new JSONObject(br.readLine());
+        String result = response.getString("output");
+
+        // TODO: 2024-08-10 (010) String이 아닌 주식 정보를 담아서 보내줌. 데이터 정제는 Service에서
+        return result;
     }
 
 }
