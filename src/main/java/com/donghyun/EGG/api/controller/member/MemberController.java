@@ -38,6 +38,7 @@ public class MemberController {
     @GetMapping("/kis")
     public String test() throws IOException, JSONException {
         String accessToken = kisUtil.generateKisToken();
+        // TODO: 2024-08-12 (012) String 리턴하는 습관 당장 고치기, 토큰 처리 시급 
         return accessToken;
     }
 

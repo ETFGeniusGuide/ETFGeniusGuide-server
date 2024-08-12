@@ -14,6 +14,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Component
@@ -87,7 +89,7 @@ public class KisUtil {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 
-            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccess_token());
+            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccessToken());
             con.setRequestProperty("appkey", prodAppkey);
             con.setRequestProperty("appsecret", prodAppSecret);
             con.setRequestProperty("tr_id", "CTPF1002R");
@@ -109,10 +111,61 @@ public class KisUtil {
         }
 
         JSONObject response = new JSONObject(br.readLine());
+//        log.debug("[KisUtil][loadStockInfo] {}: 결과값", response.toString());
+
+
         String result = response.getString("output");
 
         // TODO: 2024-08-10 (010) String이 아닌 주식 정보를 담아서 보내줌. 데이터 정제는 Service에서
         return result;
     }
 
+    public String loadStockMonthlyPrice(StockDto stockDto) throws IOException, JSONException {
+        String apiUrl = prod + "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice?fid_cond_mrkt_div_code=J&fid_input_date_1=20230601&fid_period_div_code=M&fid_org_adj_prc=1";
+        apiUrl += "&fid_input_iscd=" + stockDto.getPdno();
+        apiUrl += "&fid_input_date_2=" + today();
+
+        BufferedReader br;
+
+        try {
+            URL url = new URL(apiUrl);
+
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccessToken());
+            con.setRequestProperty("appkey", prodAppkey);
+            con.setRequestProperty("appsecret", prodAppSecret);
+            con.setRequestProperty("tr_id", "FHKST03010100");
+
+            int responseCode = con.getResponseCode();
+
+            if(responseCode == 200) {
+                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            }
+            else {
+                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }
+
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+//        JSONObject response = new JSONObject(br.readLine());
+//        log.debug("[KisUtil][loadStockMonthlyPrice] {}: 결과값", response.toString());
+
+//        String result = response.getString("output");
+        String result = br.readLine();
+
+        return result;
+    }
+
+    public String today() {
+        LocalDate localDate = LocalDate.now();
+        String today = localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return today;
+    }
 }

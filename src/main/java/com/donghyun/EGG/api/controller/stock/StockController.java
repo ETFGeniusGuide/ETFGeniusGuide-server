@@ -22,16 +22,27 @@ public class StockController {
     private final StockService stockService;
 
     @GetMapping
-    public StockInfoResponse loadStock(@RequestParam("access_token") String access_token, @RequestParam("stockCode") String stockCode) throws JSONException, IOException {
+    public StockInfoResponse loadStock(@RequestParam("access_token") String accessToken, @RequestParam("stock_code") String stockCode) throws JSONException, IOException {
 
         log.debug("[StockController][loadStock] 종목코드: {}", stockCode);
 
         StockDto stockDto = StockDto.builder()
-                .access_token(access_token)
+                .accessToken(accessToken)
                 .pdno(stockCode)
                 .build();
 
         return stockService.loadStock(stockDto);
+    }
+
+    @GetMapping("saveprice")
+    public String saveStock(@RequestParam("access_token") String accessToken, @RequestParam("stock_code") String stockCode) throws JSONException, IOException {
+
+        StockDto stockDto = StockDto.builder()
+                .accessToken(accessToken)
+                .pdno(stockCode)
+                .build();
+
+        return stockService.saveStock(stockDto);
     }
 
 
