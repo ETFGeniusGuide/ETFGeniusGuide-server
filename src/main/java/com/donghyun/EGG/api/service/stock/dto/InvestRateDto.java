@@ -5,12 +5,16 @@ import lombok.Data;
 
 @Data
 public class InvestRateDto {
+    private String startDate;
+    private String endDate;
     private int ndxRate;
     private int spxRate;
     private int djiRate;
 
     @Builder
-    public InvestRateDto(int ndxRate, int spxRate, int djiRate) {
+    public InvestRateDto(String startDate, String endDate, int ndxRate, int spxRate, int djiRate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.ndxRate = ndxRate;
         this.spxRate = spxRate;
         this.djiRate = djiRate;
