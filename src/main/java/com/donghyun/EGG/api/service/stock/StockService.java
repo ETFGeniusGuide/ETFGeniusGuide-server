@@ -1,6 +1,9 @@
 package com.donghyun.EGG.api.service.stock;
 
+import com.donghyun.EGG.api.controller.stock.response.RateCalculationResponse;
 import com.donghyun.EGG.api.controller.stock.response.StockInfoResponse;
+import com.donghyun.EGG.api.service.stock.dto.PriceCalculationDto;
+import com.donghyun.EGG.api.service.stock.dto.RateCalculationDto;
 import com.donghyun.EGG.api.service.stock.dto.StockDto;
 import com.donghyun.EGG.domain.stockprice.TigerETFMonthlyPrice;
 import com.donghyun.EGG.domain.stockprice.repository.TigerETFMonthlyPriceRepository;
@@ -15,6 +18,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +29,7 @@ public class StockService {
 
     private final KisUtil kisUtil;
     private final TigerETFMonthlyPriceRepository tigerETFMonthlyPriceRepository;
+    private double nowNdxRate;
 
     public StockInfoResponse loadStock(StockDto stockDto) throws IOException, JSONException {
 
@@ -54,7 +61,7 @@ public class StockService {
 
         JSONArray jsonArray = new JSONArray(result.getString("output2"));
 
-        for(int i = 0; i < jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject object = jsonArray.getJSONObject(i);
 
             String s_date = object.getString("stck_bsop_date");
@@ -71,5 +78,106 @@ public class StockService {
         }
 
         return name;
+    }
+
+    public String calcInvestRate(String accessToken, RateCalculationDto dto) {
+
+        ArrayList<PriceCalculationDto> ndxMonthlyPriceList = new ArrayList<>();
+        ArrayList<PriceCalculationDto> spxMonthlyPriceList = new ArrayList<>();
+        ArrayList<PriceCalculationDto> djiMonthlyPriceList = new ArrayList<>();
+
+        // 시작 날짜의 가격 가져오기 -> 리스트로
+        try {
+            ndxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "133690");
+            spxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "360750");
+            djiMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "458730");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Collections.sort(ndxMonthlyPriceList, (Comparator.comparing(PriceCalculationDto::getLocalDate)));
+        Collections.sort(spxMonthlyPriceList, (Comparator.comparing(PriceCalculationDto::getLocalDate)));
+        Collections.sort(djiMonthlyPriceList, (Comparator.comparing(PriceCalculationDto::getLocalDate)));
+
+
+//        for(PriceCalculationDto ndxDto: ndxMonthlyPriceList) {
+//            log.debug("[StockService][calcInvestRate] 월별 결과값: {}", ndxDto.getLocalDate());
+//            log.debug("[StockService][calcInvestRate] 월별 결과값: {}", ndxDto.getPrice());
+//        }
+
+        // 각 ETF의 수익률, 비율에 따른 ETF별 수익률 초기화 시키기
+
+
+        int sum = dto.getNdxRate() + dto.getSpxRate() + dto.getDjiRate();
+
+        String startDate = dto.getStartDate();
+
+        ArrayList<RateCalculationResponse> ndxRoiList = calcRate(dto.getNdxRate(), startDate, ndxMonthlyPriceList, sum);
+        ArrayList<RateCalculationResponse> spxRoiList = calcRate(dto.getSpxRate(), startDate, spxMonthlyPriceList, sum);
+        ArrayList<RateCalculationResponse> djiRoiList = calcRate(dto.getDjiRate(), startDate, djiMonthlyPriceList, sum);
+
+        ArrayList<RateCalculationResponse> roiList = new ArrayList<>();
+        for (int i = 0; i < ndxRoiList.size(); i++) {
+            double roi = ndxRoiList.get(i).getRoi() + spxRoiList.get(i).getRoi() + djiRoiList.get(i).getRoi();
+
+
+            log.debug("{} {} {}", ndxRoiList.get(i).getRoi(), spxRoiList.get(i).getRoi(), djiRoiList.get(i).getRoi());
+
+
+            roi = Math.round(roi * 100) / 100.0;
+
+            String date = ndxRoiList.get(i).getDate();
+
+            roiList.add(RateCalculationResponse.builder()
+                    .roi(roi)
+                    .date(date)
+                    .build());
+        }
+        for (int i = 0; i < ndxRoiList.size(); i++) {
+            log.debug("[StockService][calcInvestRate] {} 기간의 ETF 비율: {}", roiList.get(i).getDate(), roiList.get(i).getRoi());
+        }
+        // ?
+        // -> 계산식: 이전 비율에 따른 ETF 수익률 *  (현재 ETF 수익률 / 전달 ETF 수익률)
+        // 해당 달의 3개의 수익률을 더해 날짜 및 총 수익률 저장
+        // 반복
+
+
+        return "123";
+    }
+
+
+    // 비즈니스 로직
+
+    ArrayList<RateCalculationResponse> calcRate(int ETFRate, String startDate, ArrayList<PriceCalculationDto> ETFMonthlyPriceList, int sum) {
+
+        ArrayList<RateCalculationResponse> ETFRoiList = new ArrayList<>();
+        // TODO: 2024-08-31 (031) 날짜 저장 시 문자열 처리가 아닌 LocalDate관리
+        double prevETFRate = ((double) ETFRate / sum) * 100;
+        double nowETFRate;
+
+        ETFRoiList.add(RateCalculationResponse.builder()
+                .roi(prevETFRate)
+                .date(startDate.substring(0, 6))
+                .build());
+
+        for (int i = 1; i < ETFMonthlyPriceList.size(); i++) {
+
+            nowETFRate = (prevETFRate * ETFMonthlyPriceList.get(i).getPrice() / ETFMonthlyPriceList.get(i - 1).getPrice());
+            // 계산식
+
+            ETFRoiList.add(RateCalculationResponse.builder()
+                    .roi(nowETFRate)
+                    .date(ETFMonthlyPriceList.get(i).getLocalDate().substring(0, 6))
+                    .build());
+
+            prevETFRate = nowETFRate;
+        }
+
+//        for (int i = 0; i < ETFRoiList.size(); i++) {
+//            log.debug("[StockService][calcInvestRate] {} 기간의 ETF 비율: {}", ETFRoiList.get(i).getDate(), ETFRoiList.get(i).getRoi());
+//        }
+
+        return ETFRoiList;
     }
 }

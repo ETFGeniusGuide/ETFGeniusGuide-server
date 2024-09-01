@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class InvestRateDto {
+public class RateCalculationDto {
     private String startDate;
     private String endDate;
     private int ndxRate;
@@ -12,7 +12,7 @@ public class InvestRateDto {
     private int djiRate;
 
     @Builder
-    public InvestRateDto(String startDate, String endDate, int ndxRate, int spxRate, int djiRate) {
+    public RateCalculationDto(String startDate, String endDate, int ndxRate, int spxRate, int djiRate) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.ndxRate = ndxRate;

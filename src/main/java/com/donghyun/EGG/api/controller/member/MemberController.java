@@ -1,5 +1,6 @@
 package com.donghyun.EGG.api.controller.member;
 
+import com.donghyun.EGG.api.controller.member.response.KisTokenResponse;
 import com.donghyun.EGG.api.service.member.MemberService;
 import com.donghyun.EGG.security.KisUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +37,8 @@ public class MemberController {
     private final KisUtil kisUtil;
 
     @GetMapping("/kis")
-    public String test() throws IOException, JSONException {
-        String accessToken = kisUtil.generateKisToken();
+    public KisTokenResponse kisToken() throws IOException, JSONException {
+        KisTokenResponse accessToken = KisTokenResponse.builder().accessToken(kisUtil.generateKisToken()).build();
         // TODO: 2024-08-12 (012) String 리턴하는 습관 당장 고치기, 토큰 처리 시급 
         return accessToken;
     }

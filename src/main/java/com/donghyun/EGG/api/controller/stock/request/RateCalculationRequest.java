@@ -1,10 +1,10 @@
 package com.donghyun.EGG.api.controller.stock.request;
 
-import com.donghyun.EGG.api.service.stock.dto.InvestRateDto;
+import com.donghyun.EGG.api.service.stock.dto.RateCalculationDto;
 import lombok.Data;
 
 @Data
-public class InvestRateRequest {
+public class RateCalculationRequest {
     private String startDate;
     private String endDate;
     private Integer ndxRate;
@@ -12,8 +12,8 @@ public class InvestRateRequest {
     private Integer djiRate;
 
 
-    public InvestRateDto toInvestRateDto() {
-        return InvestRateDto.builder()
+    public RateCalculationDto toInvestRateDto() {
+        return RateCalculationDto.builder()
                 .startDate(this.startDate)
                 .endDate(this.endDate)
                 .ndxRate(this.ndxRate)
