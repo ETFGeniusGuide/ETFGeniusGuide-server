@@ -2,6 +2,7 @@ package com.donghyun.EGG.security;
 
 import com.donghyun.EGG.api.service.stock.dto.PriceCalculationDto;
 import com.donghyun.EGG.api.service.stock.dto.StockDto;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
@@ -33,11 +34,28 @@ public class KisUtil {
     @Value("${PROD}")
     private String prod;
 
+    private String kisToken;
+
+    @PostConstruct
+    public void init() {
+        try {
+            this.kisToken = generateKisToken();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getKisToken() {
+        return this.kisToken;
+    }
 
     public String generateKisToken() throws IOException, JSONException {
         String apiURL = prod + "/oauth2/tokenP";
 
         BufferedReader br;
+        // TODO: 2024-09-01 (001) WebClient로 변경
         try {
             URL url = new URL(apiURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -77,6 +95,9 @@ public class KisUtil {
         JSONObject tokenResult = new JSONObject(br.readLine());
         String accessToken = tokenResult.getString("access_token");
         log.debug("{}: access_token", accessToken);
+
+        this.kisToken = accessToken;
+//        log.debug("[KisUtill][generateKisToken] kisToken: {}", getKisToken());
 
         return accessToken;
     }
