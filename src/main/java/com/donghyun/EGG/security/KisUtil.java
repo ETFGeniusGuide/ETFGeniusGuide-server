@@ -9,6 +9,8 @@ import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -52,52 +55,26 @@ public class KisUtil {
     }
 
     public String generateKisToken() throws IOException, JSONException {
-        String apiURL = prod + "/oauth2/tokenP";
 
-        BufferedReader br;
-        // TODO: 2024-09-01 (001) WebClient로 변경
-        try {
-            URL url = new URL(apiURL);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
+        WebClient webClient = WebClient.create();
 
-            JSONObject json = new JSONObject();
-            json.put("grant_type", "client_credentials");
-            json.put("appkey", prodAppkey); // prodAppkey 변수를 여기에 사용하세요
-            json.put("appsecret", prodAppSecret); // prodAppSecret 변수를 여기에 사용하세요
+        Map<String, String> requestBody = Map.of(
+                "grant_type", "client_credentials",
+                "appkey", prodAppkey,
+                "appsecret", prodAppSecret
+        );
 
-            // OutputStream을 사용하여 JSON 데이터를 전송
-            con.setDoOutput(true);
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = json.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
+        Mono<String> response = webClient.post()
+                .uri(prod + "/oauth2/tokenP")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class);
 
-//            con.setRequestProperty("grant_type", "client_credentials");
-//            con.setRequestProperty("appkey", prodAppkey);
-//            con.setRequestProperty("appsecret", prodAppSecret);
-
-            int responseCode = con.getResponseCode();
-            if (responseCode == 200) { // 정상 호출
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-
-            } else {  // 에러 발생
-                log.debug("kis토큰 발급시 에러 발생!");
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                log.debug("에러: {}", br.readLine());
-                return "에러발생!";
-            }
-
-        } catch (IOException e) {
-            throw new IOException(e);
-        }
-
-        JSONObject tokenResult = new JSONObject(br.readLine());
+        JSONObject tokenResult = new JSONObject(response.block());
         String accessToken = tokenResult.getString("access_token");
-        log.debug("{}: access_token", accessToken);
 
+        // 발급된 토큰을 변수에 저장
         this.kisToken = accessToken;
-//        log.debug("[KisUtill][generateKisToken] kisToken: {}", getKisToken());
 
         return accessToken;
     }
