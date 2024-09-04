@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +30,18 @@ public class StockService {
 
     private final KisUtil kisUtil;
     private final TigerETFMonthlyPriceRepository tigerETFMonthlyPriceRepository;
-    private double nowNdxRate;
 
-    public StockInfoResponse loadStock(StockDto stockDto) throws IOException, JSONException {
+    /**
+     * 종목 코드의 가격을 불러오는 서비스
+     *
+     * @param stockCode
+     * @return
+     * @throws IOException
+     * @throws JSONException
+     */
+    public StockInfoResponse loadStock(String stockCode) throws IOException, JSONException {
 
-        String result = kisUtil.loadStockInfo(stockDto);
+        String result = kisUtil.loadStockInfo(stockCode);
         log.debug(result);
 
         JSONObject jsonObject = new JSONObject(result);
@@ -53,8 +61,16 @@ public class StockService {
         return stockInfoResponse;
     }
 
-    public String saveStock(StockDto stockDto) throws JSONException, IOException {
-        JSONObject result = new JSONObject(kisUtil.loadStockMonthlyPrice(stockDto));
+    /**
+     * 종목코드를 받으면 6월 30일부터 현재까지의 국내지수추종 ETF 가격을 DB에 저장하는 서비스
+     *
+     * @param stockCode
+     * @return
+     * @throws JSONException
+     * @throws IOException
+     */
+    public String saveStock(String stockCode) throws JSONException, IOException {
+        JSONObject result = new JSONObject(kisUtil.loadStockMonthlyPrice(stockCode));
 
         String name = result.getJSONObject("output1").getString("hts_kor_isnm");
         log.debug("[StockService][saveStock] ETF명: {}", name);
@@ -80,17 +96,23 @@ public class StockService {
         return name;
     }
 
-    public String calcInvestRate(String accessToken, RateCalculationDto dto) {
+    /**
+     * 비율에 따른 월별 총 ETF 수익률 계산 서비스
+     *
+     * @param dto
+     * @return
+     */
+    public List<RateCalculationResponse> calcInvestRate(RateCalculationDto dto) {
 
-        ArrayList<PriceCalculationDto> ndxMonthlyPriceList = new ArrayList<>();
-        ArrayList<PriceCalculationDto> spxMonthlyPriceList = new ArrayList<>();
-        ArrayList<PriceCalculationDto> djiMonthlyPriceList = new ArrayList<>();
+        ArrayList<PriceCalculationDto> ndxMonthlyPriceList;
+        ArrayList<PriceCalculationDto> spxMonthlyPriceList;
+        ArrayList<PriceCalculationDto> djiMonthlyPriceList;
 
         // 시작 날짜의 가격 가져오기 -> 리스트로
         try {
-            ndxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "133690");
-            spxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "360750");
-            djiMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(accessToken, dto.getStartDate(), dto.getEndDate(), "458730");
+            ndxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(dto.getStartDate(), dto.getEndDate(), "133690");
+            spxMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(dto.getStartDate(), dto.getEndDate(), "360750");
+            djiMonthlyPriceList = kisUtil.loadIndexMonthlyPrice(dto.getStartDate(), dto.getEndDate(), "458730");
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -143,7 +165,7 @@ public class StockService {
         // 반복
 
 
-        return "123";
+        return roiList;
     }
 
 

@@ -7,12 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class StockDto {
-    private String accessToken;
-    private String pdno;
 
-    @Builder
-    public StockDto(String accessToken, String pdno) {
-        this.accessToken = accessToken;
-        this.pdno = pdno;
-    }
 }

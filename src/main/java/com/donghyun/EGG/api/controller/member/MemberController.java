@@ -39,8 +39,15 @@ public class MemberController {
     @GetMapping("/kis")
     public KisTokenResponse kisToken() throws IOException, JSONException {
         KisTokenResponse accessToken = KisTokenResponse.builder().accessToken(kisUtil.generateKisToken()).build();
-        // TODO: 2024-08-12 (012) String 리턴하는 습관 당장 고치기, 토큰 처리 시급 
+        // TODO: 2024-08-12 (012) String 리턴하는 습관 당장 고치기, 토큰 처리 시급
+//        log.debug("kisToken: {}", kisUtil.getKisToken());
+
         return accessToken;
+    }
+
+    @GetMapping("/kistest")
+    public void test() {
+        log.debug("kisToken: {}", kisUtil.getKisToken());
     }
 
     @GetMapping("/naverlogin")

@@ -36,7 +36,7 @@ public class KisUtil {
 
     private String kisToken;
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         try {
             this.kisToken = generateKisToken();
@@ -102,9 +102,9 @@ public class KisUtil {
         return accessToken;
     }
 
-    public String loadStockInfo(StockDto stockDto) throws IOException, JSONException {
+    public String loadStockInfo(String stockCode) throws IOException, JSONException {
         String apiUrl = prod + "/uapi/domestic-stock/v1/quotations/search-stock-info?PRDT_TYPE_CD=300";
-        apiUrl += "&PDNO=" + stockDto.getPdno();
+        apiUrl += "&PDNO=" + stockCode;
 
         BufferedReader br;
 
@@ -113,7 +113,7 @@ public class KisUtil {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 
-            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccessToken());
+            con.setRequestProperty("authorization", "Bearer " + this.kisToken);
             con.setRequestProperty("appkey", prodAppkey);
             con.setRequestProperty("appsecret", prodAppSecret);
             con.setRequestProperty("tr_id", "CTPF1002R");
@@ -143,9 +143,9 @@ public class KisUtil {
         return result;
     }
 
-    public String loadStockMonthlyPrice(StockDto stockDto) throws IOException, JSONException {
+    public String loadStockMonthlyPrice(String stockCode) throws IOException, JSONException {
         String apiUrl = prod + "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice?fid_cond_mrkt_div_code=J&fid_input_date_1=20230601&fid_period_div_code=M&fid_org_adj_prc=1";
-        apiUrl += "&fid_input_iscd=" + stockDto.getPdno();
+        apiUrl += "&fid_input_iscd=" + stockCode;
         apiUrl += "&fid_input_date_2=" + today();
 
         BufferedReader br;
@@ -155,7 +155,7 @@ public class KisUtil {
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-            con.setRequestProperty("authorization", "Bearer " + stockDto.getAccessToken());
+            con.setRequestProperty("authorization", "Bearer " + this.kisToken);
             con.setRequestProperty("appkey", prodAppkey);
             con.setRequestProperty("appsecret", prodAppSecret);
             con.setRequestProperty("tr_id", "FHKST03010100");
@@ -175,17 +175,12 @@ public class KisUtil {
             throw new RuntimeException(e);
         }
 
-
-//        JSONObject response = new JSONObject(br.readLine());
-//        log.debug("[KisUtil][loadStockMonthlyPrice] {}: 결과값", response.toString());
-
-//        String result = response.getString("output");
         String result = br.readLine();
 
         return result;
     }
 
-    public ArrayList<PriceCalculationDto> loadIndexMonthlyPrice(String accessToken, String startDate, String endDate, String pdno) throws IOException {
+    public ArrayList<PriceCalculationDto> loadIndexMonthlyPrice(String startDate, String endDate, String pdno) throws IOException {
         String apiUrl = prod + "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice?fid_cond_mrkt_div_code=J&fid_period_div_code=M&fid_org_adj_prc=1";
 
         apiUrl += "&fid_input_iscd=" + pdno;
@@ -199,7 +194,7 @@ public class KisUtil {
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-            con.setRequestProperty("authorization", "Bearer " + accessToken);
+            con.setRequestProperty("authorization", "Bearer " + this.kisToken);
             con.setRequestProperty("appkey", prodAppkey);
             con.setRequestProperty("appsecret", prodAppSecret);
             con.setRequestProperty("tr_id", "FHKST03010100");
