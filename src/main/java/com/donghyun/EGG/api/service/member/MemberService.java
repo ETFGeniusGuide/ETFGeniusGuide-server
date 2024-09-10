@@ -1,7 +1,9 @@
 package com.donghyun.EGG.api.service.member;
 
+import com.donghyun.EGG.api.controller.member.response.MemberLoginResponse;
 import com.donghyun.EGG.domain.member.Member;
 import com.donghyun.EGG.domain.member.repository.MemberRepository;
+import com.donghyun.EGG.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -15,24 +17,31 @@ import org.springframework.stereotype.Service;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final JwtUtil jwtUtil;
 
-    public Long naverLogin(JSONObject jsonObject) throws JSONException {
-        // TODO: 2024-07-23 (023) joinMember가 아닌 sns로그인 함수로 이름 변경
+    public MemberLoginResponse naverLogin(JSONObject userInfo) throws JSONException {
 
-        String email = jsonObject.getString("email");
+        String email = userInfo.getString("email");
+        log.debug("이메일: {}", userInfo.getString("email"));
+
+        String name = userInfo.getString("name");
+        log.debug("이름: {}", userInfo.getString("name"));
+
         if(memberRepository.existsByEmail(email)) {
-            log.debug("{} :이전에 네이버 소셜로그인했던 이메일 입니다.", email);
-            return memberRepository.findByEmail(email).getId();
+            log.info("{} :이전에 네이버 소셜로그인했던 이메일 입니다.", email);
+        }
+        else {
+            Member member = Member.builder()
+                    .email(email)
+                    .name(userInfo.getString("name"))
+                    .password(userInfo.getString("mobile"))
+                    .build();
+            memberRepository.save(member).getId();
+            log.info("[naverLogin] {}: 회원가입 성공했습니다!", email);
         }
 
-        Member member = Member.builder()
-                .email(email)
-                .name(jsonObject.getString("name"))
-                .password(jsonObject.getString("mobile"))
-                .build();
-        // TODO: 2024-07-23 (023) sns계정 회원가입 다시 구현
-
-        return memberRepository.save(member).getId();
+        // 사용자의 이메일, 이름을 바탕으로 jwt 생성
+        return jwtUtil.generateAllToken(email, name);
     }
 
 }

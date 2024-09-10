@@ -1,6 +1,7 @@
 package com.donghyun.EGG.api.controller.member;
 
 import com.donghyun.EGG.api.controller.member.response.KisTokenResponse;
+import com.donghyun.EGG.api.controller.member.response.MemberLoginResponse;
 import com.donghyun.EGG.api.service.member.MemberService;
 import com.donghyun.EGG.security.KisUtil;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class MemberController {
     }
 
     @GetMapping("/naverlogin")
-    public Long naverLoginMember(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state) throws IOException, JSONException {
+    public MemberLoginResponse naverLoginMember(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state) throws IOException, JSONException {
         // naver 로그인 시도 -> 처음이면 로그인, 로그인 이력이 있으면 통과 -> 로그인이 완료되면 콜백주소인 도메인/naverlogin 호출 ( 현재 함수 == 콜백 함수 )
 
         WebClient webClient = WebClient.create();
@@ -78,15 +79,12 @@ public class MemberController {
 
         String access_token = tokens.getString("access_token");
         String refresh_token = tokens.getString("refresh_token");
-        log.debug("access_token: {}", access_token);
-        log.debug("refresh_token: {}", refresh_token);
+//        log.debug("access_token: {}", access_token);
+//        log.debug("refresh_token: {}", refresh_token);
 
         // getUserInfo()를 통해 회원정보 가져오기
         JSONObject userInfo = new JSONObject(getUserInfo(access_token)).getJSONObject("response");
 
-        log.debug("이름: {}", userInfo.getString("name"));
-
-        // TODO: 2024-07-23 (023) join이 아닌 sns 로그인 함수로 연결
         return memberService.naverLogin(userInfo);
     }
 
