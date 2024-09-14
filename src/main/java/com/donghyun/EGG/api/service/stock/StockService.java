@@ -48,10 +48,10 @@ public class StockService {
 
         // TODO: 2024-08-10 (010) Service에서 필요한 데이터 추출 후 정제
         String prdt_abrv_name = jsonObject.getString("prdt_abrv_name");
-        log.debug("[StockService][loadStock] 종목이름: {}", prdt_abrv_name);
+        log.debug("[loadStock] 종목이름: {}", prdt_abrv_name);
 
         int thdt_clpr = Integer.parseInt(jsonObject.getString("thdt_clpr"));
-        log.debug("[StockService][loadStock] 종목 당일종가: {}", thdt_clpr);
+        log.debug("[loadStock] 종목 당일종가: {}", thdt_clpr);
 
         StockInfoResponse stockInfoResponse = StockInfoResponse.builder()
                 .stockName(prdt_abrv_name)
@@ -73,7 +73,7 @@ public class StockService {
         JSONObject result = new JSONObject(kisUtil.loadStockMonthlyPrice(stockCode));
 
         String name = result.getJSONObject("output1").getString("hts_kor_isnm");
-        log.debug("[StockService][saveStock] ETF명: {}", name);
+        log.debug("[saveStock] ETF명: {}", name);
 
         JSONArray jsonArray = new JSONArray(result.getString("output2"));
 
@@ -124,8 +124,8 @@ public class StockService {
 
 
 //        for(PriceCalculationDto ndxDto: ndxMonthlyPriceList) {
-//            log.debug("[StockService][calcInvestRate] 월별 결과값: {}", ndxDto.getLocalDate());
-//            log.debug("[StockService][calcInvestRate] 월별 결과값: {}", ndxDto.getPrice());
+//            log.debug("[calcInvestRate] 월별 결과값: {}", ndxDto.getLocalDate());
+//            log.debug("[calcInvestRate] 월별 결과값: {}", ndxDto.getPrice());
 //        }
 
         // 각 ETF의 수익률, 비율에 따른 ETF별 수익률 초기화 시키기
@@ -144,7 +144,7 @@ public class StockService {
             double roi = ndxRoiList.get(i).getRoi() + spxRoiList.get(i).getRoi() + djiRoiList.get(i).getRoi();
 
 
-            log.debug("{} {} {}", ndxRoiList.get(i).getRoi(), spxRoiList.get(i).getRoi(), djiRoiList.get(i).getRoi());
+//            log.debug("{} {} {}", ndxRoiList.get(i).getRoi(), spxRoiList.get(i).getRoi(), djiRoiList.get(i).getRoi());
 
 
             roi = Math.round(roi * 100) / 100.0;
@@ -156,9 +156,9 @@ public class StockService {
                     .date(date)
                     .build());
         }
-        for (int i = 0; i < ndxRoiList.size(); i++) {
-            log.debug("[StockService][calcInvestRate] {} 기간의 ETF 비율: {}", roiList.get(i).getDate(), roiList.get(i).getRoi());
-        }
+//        for (int i = 0; i < ndxRoiList.size(); i++) {
+//            log.debug("[calcInvestRate] {} 기간의 ETF 비율: {}", roiList.get(i).getDate(), roiList.get(i).getRoi());
+//        }
         // ?
         // -> 계산식: 이전 비율에 따른 ETF 수익률 *  (현재 ETF 수익률 / 전달 ETF 수익률)
         // 해당 달의 3개의 수익률을 더해 날짜 및 총 수익률 저장
@@ -197,7 +197,7 @@ public class StockService {
         }
 
 //        for (int i = 0; i < ETFRoiList.size(); i++) {
-//            log.debug("[StockService][calcInvestRate] {} 기간의 ETF 비율: {}", ETFRoiList.get(i).getDate(), ETFRoiList.get(i).getRoi());
+//            log.debug("[calcInvestRate] {} 기간의 ETF 비율: {}", ETFRoiList.get(i).getDate(), ETFRoiList.get(i).getRoi());
 //        }
 
         return ETFRoiList;

@@ -4,13 +4,17 @@ import com.donghyun.EGG.api.controller.member.response.MemberLoginResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
 
@@ -33,6 +37,7 @@ public class JwtUtil {
         String accessToken = generateToken(subject, name, ACCESS_TOKEN_EXPIRE_TIME);
         String refreshToken = generateToken(subject, name, REFRESH_TOKEN_EXPIRE_TIME);
 
+        log.info("[generateAllToken] 정상적으로 토큰이 발급되었습니다!");
         return MemberLoginResponse.of(accessToken, refreshToken);
     }
 
@@ -51,36 +56,13 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String checkToken() {
-        String accessToken = getJwt();
-        log.debug("accessToken: {}", accessToken);
-        try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(accessToken)
-                    .getBody();
-            // JWT 토큰 형식 판단 및 서명 검증
-            log.debug("claims: {}", claims);
+    public Claims validateToken(String token) {;
 
-        } catch (ExpiredJwtException e) {
-            log.debug("ExpiredJwtException: {}", e);
-
-        } catch (JwtException e) {
-            log.debug("JwtException: {}", e);
-        }
-        return accessToken;
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
-
-    public String getJwt() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String token = request.getHeader("Authorization");
-        if (token.startsWith("Bearer")) {
-            token = token.substring(7);
-        }
-        return token;
-
-    }
-
 
 }
