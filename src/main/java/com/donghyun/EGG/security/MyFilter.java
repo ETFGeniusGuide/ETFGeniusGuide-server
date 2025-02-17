@@ -24,8 +24,14 @@ public class MyFilter implements Filter {
 
         String authHeader = httpRequest.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null) {
             log.debug("[doFilter] JWT 토큰이 없습니다!");
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
+        }
+
+        if (!authHeader.startsWith("Bearer ")) {
+            log.debug("[doFilter] JWT 토큰이 Bearer로 시작하지 않습니다!");
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             return;
         }
