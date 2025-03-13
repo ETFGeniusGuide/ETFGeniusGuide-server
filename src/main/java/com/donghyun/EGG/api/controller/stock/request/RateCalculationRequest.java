@@ -13,6 +13,10 @@ public class RateCalculationRequest {
 
 
     public RateCalculationDto toInvestRateDto() {
+
+        startDate = startDate.replace("-", "");
+        endDate = endDate.replace("-", "");
+
         return RateCalculationDto.builder()
                 .startDate(this.startDate)
                 .endDate(this.endDate)
