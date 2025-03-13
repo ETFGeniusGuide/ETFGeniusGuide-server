@@ -44,6 +44,12 @@ public class MyFilter implements Filter {
             return;
         }
 
+        if (!authHeader.startsWith("Bearer ")) {
+            log.debug("[doFilter] JWT 토큰이 Bearer로 시작하지 않습니다!");
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
+        }
+
         String token = authHeader.substring(7); // "Bearer " 부분을 제외한 실제 토큰
 
         try {
