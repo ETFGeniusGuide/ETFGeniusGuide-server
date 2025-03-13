@@ -22,6 +22,14 @@ public class MyFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        log.debug("[doFilter] 요청의 헤더 메소드를 확인해보자: {}", httpRequest.getMethod());
+
+        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            log.debug("[doFilter] Preflight 요청 - JWT 검사 건너뛰기");
+            chain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = httpRequest.getHeader("Authorization");
 
         if (authHeader == null) {
