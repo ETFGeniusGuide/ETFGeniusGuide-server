@@ -36,7 +36,7 @@ public class StockController {
         return stockService.saveStock(stockCode);
     }
 
-    @GetMapping("calc")
+    @PostMapping("calc")
     public List<RateCalculationResponse> calcInvestRate(@RequestBody RateCalculationRequest request) {
 
         log.debug("[calcInvestRate] 나스닥100: {}", request.getNdxRate());
