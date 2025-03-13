@@ -24,9 +24,15 @@ public class MyFilter implements Filter {
 
         String authHeader = httpRequest.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null) {
             log.debug("[doFilter] JWT 토큰이 없습니다!");
-            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 없습니다!");
+            return;
+        }
+
+        if (!authHeader.startsWith("Bearer ")) {
+            log.debug("[doFilter] JWT 토큰이 Bearer로 시작하지 않습니다!");
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 Bearer로 시작하지 않습니다!");
             return;
         }
 
@@ -37,13 +43,12 @@ public class MyFilter implements Filter {
             Claims claims = jwtUtil.validateToken(token);
             log.debug("[doFilter] JWT 토큰 검증 성공: {}", claims.getSubject());
 
-            // 다음 필터로 요청을 넘김
-            chain.doFilter(request, response);
-
         } catch (Exception e) {
             log.error("[doFilter] JWT 토큰 검증 실패: {}", e.getMessage());
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
         }
+
+        chain.doFilter(request, response);
 
         log.debug("[doFilter] 필터 나간다!");
 
