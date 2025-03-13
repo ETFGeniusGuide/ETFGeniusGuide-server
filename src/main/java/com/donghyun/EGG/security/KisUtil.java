@@ -39,7 +39,7 @@ public class KisUtil {
 
     private String kisToken;
 
-//    @PostConstruct
+    @PostConstruct
     public void init() {
         try {
             this.kisToken = generateKisToken();
