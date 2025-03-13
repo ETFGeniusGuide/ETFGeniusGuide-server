@@ -39,13 +39,17 @@ public class StockController {
     @GetMapping("calc")
     public List<RateCalculationResponse> calcInvestRate(@RequestBody RateCalculationRequest request) {
 
-        log.debug("[StockController][calcInvestRate] 나스닥100: {}", request.getNdxRate());
-        log.debug("[StockController][calcInvestRate] S&P500: {}", request.getSpxRate());
-        log.debug("[StockController][calcInvestRate] 미국배당다우존스: {}", request.getDjiRate());
+        log.debug("[calcInvestRate] 나스닥100: {}", request.getNdxRate());
+        log.debug("[calcInvestRate] S&P500: {}", request.getSpxRate());
+        log.debug("[calcInvestRate] 미국배당다우존스: {}", request.getDjiRate());
 
-        // TODO: 2024-08-14 (014) 날짜 유효성 검사
+        // TODO: 2024-08-14 (014) 날짜 유효성 검사 ( 존재한 기간인지 확인하기 )
 
-        return stockService.calcInvestRate(request.toInvestRateDto());
+        List<RateCalculationResponse> list = stockService.calcInvestRate(request.toInvestRateDto());
+
+        log.debug("[calcInvestRate] 비율 별 월 수익률 계산 완료");
+
+        return list;
     }
 
 

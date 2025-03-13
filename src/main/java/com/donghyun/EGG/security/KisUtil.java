@@ -209,7 +209,7 @@ public class KisUtil {
 
             jsonArray = new JSONArray(result.getString("output2"));
 
-            log.debug("[KisUtil][loadStockMonthlyPrice] ETF명: {}", name);
+            log.debug("[loadStockMonthlyPrice] ETF명: {}", name);
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);

@@ -123,9 +123,22 @@ public class StockService {
         Collections.sort(djiMonthlyPriceList, (Comparator.comparing(PriceCalculationDto::getLocalDate)));
 
 
+//        log.debug("ndx 시작");
 //        for(PriceCalculationDto ndxDto: ndxMonthlyPriceList) {
 //            log.debug("[calcInvestRate] 월별 결과값: {}", ndxDto.getLocalDate());
 //            log.debug("[calcInvestRate] 월별 결과값: {}", ndxDto.getPrice());
+//        }
+//
+//        log.debug("spx 시작");
+//        for(PriceCalculationDto spxDto: spxMonthlyPriceList) {
+//            log.debug("[calcInvestRate] 월별 결과값: {}", spxDto.getLocalDate());
+//            log.debug("[calcInvestRate] 월별 결과값: {}", spxDto.getPrice());
+//        }
+//
+//        log.debug("dji 시작");
+//        for(PriceCalculationDto djiDto: djiMonthlyPriceList) {
+//            log.debug("[calcInvestRate] 월별 결과값: {}", djiDto.getLocalDate());
+//            log.debug("[calcInvestRate] 월별 결과값: {}", djiDto.getPrice());
 //        }
 
         // 각 ETF의 수익률, 비율에 따른 ETF별 수익률 초기화 시키기
@@ -140,6 +153,10 @@ public class StockService {
         ArrayList<RateCalculationResponse> djiRoiList = calcRate(dto.getDjiRate(), startDate, djiMonthlyPriceList, sum);
 
         ArrayList<RateCalculationResponse> roiList = new ArrayList<>();
+
+//        log.debug("[calcInvestRate] 수익률 계산 시작");
+//        log.debug("[calcInvestRate] ndx 수: {}, spx 수: {}, dji 수: {}", ndxRoiList.size(), spxRoiList.size(), djiRoiList.size());
+
         for (int i = 0; i < ndxRoiList.size(); i++) {
             double roi = ndxRoiList.get(i).getRoi() + spxRoiList.get(i).getRoi() + djiRoiList.get(i).getRoi();
 
@@ -164,6 +181,7 @@ public class StockService {
         // 해당 달의 3개의 수익률을 더해 날짜 및 총 수익률 저장
         // 반복
 
+//        log.debug("[calcInvestRate] 계산 완료");
 
         return roiList;
     }
