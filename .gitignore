@@ -37,3 +37,4 @@ out/
 .vscode/
 
 **/src/main/resources/application-env.yml
+**/src/main/resources/application-server-env.yml
