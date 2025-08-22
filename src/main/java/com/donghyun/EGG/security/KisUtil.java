@@ -41,13 +41,13 @@ public class KisUtil {
 
     @PostConstruct
     public void init() {
-        try {
-            this.kisToken = generateKisToken();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            this.kisToken = generateKisToken();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public String getKisToken() {
