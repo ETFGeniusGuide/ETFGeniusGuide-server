@@ -14,7 +14,7 @@ public class PlanDtos {
         @NotNull
         private String yearMonth;
         @NotNull @DecimalMin("0.01")
-        private BigDecimal amount;
+        private Integer amount;
     }
 
     @Getter @Setter
@@ -29,14 +29,14 @@ public class PlanDtos {
         @Pattern(regexp = "\\d{4}-\\d{2}") @NotNull
         private String yearMonth;
         @NotNull @DecimalMin("0.01")
-        private BigDecimal amount;
+        private Integer amount;
     }
 
     @Getter @Builder
     public static class PlanRes {
         private final Long planId;
         private final String yearMonth;
-        private final BigDecimal amount;
+        private final Integer amount;
         private final String createdAt;
     }
 }

@@ -32,4 +32,14 @@ public class SpendController {
         boolean deleted = spendService.delete(memberId, req);
         return ResponseEntity.ok().body("{\"deleted\":" + deleted + "}");
     }
+
+    @PostMapping("/listByDate")
+    public SpendDtos.ListRes listByDate(@RequestBody SpendDtos.ListByDateReq req) {
+        return spendService.listByDate(req.getYearMonth(), req.getDate());
+    }
+
+    @PostMapping("/listByMonth")
+    public SpendDtos.ListRes listByMonth(@RequestBody SpendDtos.ListByMonthReq req) {
+        return spendService.listByMonth(req.getYearMonth());
+    }
 }

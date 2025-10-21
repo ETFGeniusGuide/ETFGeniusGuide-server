@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
+
 @Service @RequiredArgsConstructor
 @Transactional
 public class SpendService {
@@ -25,9 +27,9 @@ public class SpendService {
             throw BizException.invalid("date가 yearMonth 범위를 벗어났습니다.");
         }
 
-        // 플랜 존재 강제
-        planRepo.findByMemberIdAndYearMonth(memberId, ym)
-                .orElseThrow(() -> BizException.notFound("해당 월의 플랜이 없습니다."));
+//        // 플랜 존재 강제
+//        planRepo.findByMemberIdAndYearMonth(memberId, ym)
+//                .orElseThrow(() -> BizException.notFound("해당 월의 플랜이 없습니다."));
 
         // 카테고리 존재 + 소유권(시스템 or 본인)
         var cat = categoryRepo.findById(req.getCategoryId())
@@ -38,7 +40,7 @@ public class SpendService {
 
         var saved = spendRepo.save(SpendTx.builder()
                 .memberId(memberId)
-                .yearMonth(ym)
+                .yearMonth(String.valueOf(ym))
                 .date(date)
                 .categoryId(req.getCategoryId())
                 .amount(req.getAmount())
@@ -68,7 +70,7 @@ public class SpendService {
             tx.setCategoryId(req.getCategoryId());
         }
         if (req.getAmount() != null) {
-            if (req.getAmount().signum() <= 0) throw BizException.invalid("금액은 0보다 커야 합니다.");
+            if (req.getAmount() <= 0) throw BizException.invalid("금액은 0보다 커야 합니다.");
             tx.setAmount(req.getAmount());
         }
         if (req.getMemo() != null) {
@@ -90,5 +92,41 @@ public class SpendService {
                 .orElseThrow(() -> BizException.notFound("지출 내역이 없습니다."));
         spendRepo.delete(tx);
         return true;
+    }
+
+    public SpendDtos.ListRes listByDate(String yearMonth, java.time.LocalDate date) {
+        var list = spendRepo.findAllByYearMonthAndDate(yearMonth, date).stream()
+                .map(s -> SpendDtos.SpendItemRes.builder()
+                        .id(s.getId())
+                        .yearMonth(s.getYearMonth())
+                        .date(s.getDate())
+                        .categoryId(s.getCategoryId())
+                        .categoryName(categoryRepo.findById(s.getCategoryId())
+                                .map(c -> c.getName()).orElse(null))
+                        .amount(s.getAmount())
+                        .memo(s.getMemo())
+                        .createdAt(s.getCreatedAt().toLocalDateTime())
+                        .updatedAt(s.getUpdatedAt().toLocalDateTime())
+                        .build())
+                .collect(Collectors.toList());
+        return new SpendDtos.ListRes(list);
+    }
+
+    public SpendDtos.ListRes listByMonth(String yearMonth) {
+        var list = spendRepo.findAllByYearMonth(yearMonth).stream()
+                .map(s -> SpendDtos.SpendItemRes.builder()
+                        .id(s.getId())
+                        .yearMonth(String.valueOf(s.getYearMonth()))
+                        .date(s.getDate())
+                        .categoryId(s.getCategoryId())
+                        .categoryName(categoryRepo.findById(s.getCategoryId())
+                                .map(c -> c.getName()).orElse(null))
+                        .amount(s.getAmount())
+                        .memo(s.getMemo())
+                        .createdAt(s.getCreatedAt().toLocalDateTime())
+                        .updatedAt(s.getUpdatedAt().toLocalDateTime())
+                        .build())
+                .collect(Collectors.toList());
+        return new SpendDtos.ListRes(list);
     }
 }

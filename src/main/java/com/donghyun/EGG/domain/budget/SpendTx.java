@@ -25,7 +25,7 @@ public class SpendTx {
 
     // YYYY-MM-01
     @Column(name = "ym", nullable = false)
-    private LocalDate yearMonth;
+    private String yearMonth;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
@@ -34,7 +34,7 @@ public class SpendTx {
     private Long categoryId;
 
     @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal amount;
+    private Integer amount;
 
     @Column
     private String memo;

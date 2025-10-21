@@ -28,7 +28,7 @@ public class BudgetPlan {
     private LocalDate yearMonth;
 
     @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal amount;
+    private Integer amount;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
