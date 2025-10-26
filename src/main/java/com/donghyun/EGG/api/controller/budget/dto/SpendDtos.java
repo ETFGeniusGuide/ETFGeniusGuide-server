@@ -1,24 +1,27 @@
 package com.donghyun.EGG.api.controller.budget.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+import java.util.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 
 public class SpendDtos {
     @Getter @Setter
     public static class AddReq {
-        @Pattern(regexp = "\\d{4}-\\d{2}") @NotNull
-        private String yearMonth;
-        @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}") @NotNull
-        private String date;
+        @NotNull
+        @Schema(example = "2025-10-01")
+        private LocalDate date;
         @NotNull
         private Long categoryId;
         @NotNull @DecimalMin("0.01")
+        @Schema(example = "20000")
         private Integer amount;
         @Size(max = 200)
+        @Schema(example = "생수")
         private String memo;
     }
 
@@ -28,8 +31,10 @@ public class SpendDtos {
         private Long id;
         private Long categoryId;
         @DecimalMin("0.01")
+        @Schema(example = "20000")
         private Integer amount;
         @Size(max = 200)
+        @Schema(example = "생수")
         private String memo;
     }
 
@@ -39,26 +44,42 @@ public class SpendDtos {
         private Long id;
     }
 
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class loadByMonthReq {
+        @NotNull
+        @Schema(example = "2025-10")
+        private YearMonth ym;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class getSpendDetailReq {
+        @NotNull
+        @Schema(example = "2025-10-01")
+        private Long id;
+    }
+
+
+    /***
+     *
+     */
+
     @Getter @Builder
     public static class SpendRes {
         private final Long id;
-        private final String yearMonth;
-        private final String date;
-        private final Long categoryId;
+        private final LocalDate date;
+        private final String categoryName;
         private final Integer amount;
         private final String memo;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class ListByDateReq {
-        private String yearMonth;   // "YYYY-MM"
-        private LocalDate date;     // ex) 2025-11-28
+    public static class loadByMonthRes {
+        private List<SpendRes> spendDetailResList;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class SpendItemRes {
+    public static class SpendDetailRes {
         private Long id;
-        private String yearMonth;     // "YYYY-MM"
         private LocalDate date;       // 지출 일자
         private Long categoryId;
         private String categoryName;  // 조인 결과
@@ -66,15 +87,5 @@ public class SpendDtos {
         private String memo;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
-    }
-
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class ListByMonthReq {
-        private String yearMonth; // "YYYY-MM"
-    }
-
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class ListRes {
-        private java.util.List<SpendItemRes> items;
     }
 }

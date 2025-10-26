@@ -33,13 +33,13 @@ public class SpendController {
         return ResponseEntity.ok().body("{\"deleted\":" + deleted + "}");
     }
 
-    @PostMapping("/listByDate")
-    public SpendDtos.ListRes listByDate(@RequestBody SpendDtos.ListByDateReq req) {
-        return spendService.listByDate(req.getYearMonth(), req.getDate());
+    @PostMapping("/loadByMonth")
+    public SpendDtos.loadByMonthRes loadByMonth(@RequestBody SpendDtos.loadByMonthReq req) {
+        return spendService.loadByMonth(req);
     }
 
-    @PostMapping("/listByMonth")
-    public SpendDtos.ListRes listByMonth(@RequestBody SpendDtos.ListByMonthReq req) {
-        return spendService.listByMonth(req.getYearMonth());
+    @PostMapping("/getDetail")
+    public SpendDtos.SpendDetailRes getSpendDetail(@RequestBody SpendDtos.getSpendDetailReq req) {
+        return spendService.getSpendDetail(req);
     }
 }

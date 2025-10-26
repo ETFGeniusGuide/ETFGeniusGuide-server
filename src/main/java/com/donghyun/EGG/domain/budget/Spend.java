@@ -3,29 +3,24 @@ package com.donghyun.EGG.domain.budget;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "spend_tx",
+@Table(name = "spend",
         indexes = {
                 @Index(name = "ix_spend_member_month_date_desc", columnList = "member_id,year_month,date,id"),
                 @Index(name = "ix_spend_member_month_category", columnList = "member_id,year_month,category_id"),
                 @Index(name = "ix_spend_member_date", columnList = "member_id,date")
         })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class SpendTx {
+public class Spend {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "member_id", nullable = false)
     private Long memberId;
-
-    // YYYY-MM-01
-    @Column(name = "ym", nullable = false)
-    private String yearMonth;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;

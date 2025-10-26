@@ -86,12 +86,12 @@ CREATE TRIGGER budget_plan_set_updated_at
 
 
 -- =========================================================
--- 4) 지출 내역 (spend_tx)
+-- 4) 지출 내역 (spend)
 --    - 월 독립 관리: year_month 컬럼을 명시 보관
 --    - date ∈ [year_month, year_month + 1 month) 제약
---    - 카테고리는 시스템(NULL) 또는 사용자 소유(category.user_id = NULL or = spend_tx.user_id)
+--    - 카테고리는 시스템(NULL) 또는 사용자 소유(category.user_id = NULL or = spend.user_id)
 -- =========================================================
-CREATE TABLE spend_tx (
+CREATE TABLE spend (
                           id           BIGSERIAL PRIMARY KEY,
                           user_id      BIGINT NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
                           year_month   DATE   NOT NULL,  -- YYYY-MM-01 (budget_plan.year_month 와 동일 표현)
@@ -112,22 +112,22 @@ CREATE TABLE spend_tx (
 );
 
 -- 성능 인덱스: 월별 조회/정렬, 카테고리별 합계
-CREATE INDEX ix_spend_user_month_date_desc  ON spend_tx (user_id, year_month, "date" DESC, id DESC);
-CREATE INDEX ix_spend_user_month_category   ON spend_tx (user_id, year_month, category_id);
-CREATE INDEX ix_spend_user_date             ON spend_tx (user_id, "date");
+CREATE INDEX ix_spend_user_month_date_desc  ON spend (user_id, year_month, "date" DESC, id DESC);
+CREATE INDEX ix_spend_user_month_category   ON spend (user_id, year_month, category_id);
+CREATE INDEX ix_spend_user_date             ON spend (user_id, "date");
 
-CREATE TRIGGER spend_tx_set_updated_at
-    BEFORE UPDATE ON spend_tx
+CREATE TRIGGER spend_set_updated_at
+    BEFORE UPDATE ON spend
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 
 -- =========================================================
--- 5) 참조 무결성(선택) : spend_tx와 budget_plan 연계
+-- 5) 참조 무결성(선택) : spend와 budget_plan 연계
 --    - 해당 월 계획이 반드시 있어야만 지출을 허용하려면 FK 추가
 --      (app_user + year_month 복합 FK는 별도 유니크 키 필요)
 -- =========================================================
 -- budget_plan(user_id, year_month)에 유니크가 있으므로 이를 참조하는 FK 생성
-ALTER TABLE spend_tx
+ALTER TABLE spend
     ADD CONSTRAINT fk_spend_plan
         FOREIGN KEY (user_id, year_month)
             REFERENCES budget_plan (user_id, year_month)
@@ -156,9 +156,9 @@ RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER spend_tx_validate_category_owner
+CREATE TRIGGER spend_validate_category_owner
     BEFORE INSERT OR UPDATE OF category_id, user_id
-                     ON spend_tx
+                     ON spend
                          FOR EACH ROW EXECUTE FUNCTION validate_spend_category_owner();
 
 

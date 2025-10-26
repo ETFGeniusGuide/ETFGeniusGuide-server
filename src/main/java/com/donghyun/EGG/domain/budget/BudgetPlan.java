@@ -6,12 +6,13 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 
 @Entity
 @Table(
         name = "budget_plan",
         uniqueConstraints = {
-                @UniqueConstraint(name = "ux_budget_plan_member_month", columnNames = {"member_id", "year_month"})
+                @UniqueConstraint(name = "ux_budget_plan_member_month", columnNames = {"member_id"})
         }
 )
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -23,9 +24,8 @@ public class BudgetPlan {
     @Column(name = "member_id", nullable = false)
     private Long memberId;
 
-    // YYYY-MM-01
     @Column(name = "ym", nullable = false)
-    private LocalDate yearMonth;
+    private YearMonth ym;
 
     @Column(nullable = false, precision = 14, scale = 2)
     private Integer amount;

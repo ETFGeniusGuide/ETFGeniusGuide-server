@@ -1,5 +1,6 @@
 package com.donghyun.EGG.api.controller.budget.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -12,6 +13,7 @@ public class CategoryDtos {
     @Getter @Setter
     public static class CreateReq {
         @NotBlank @Size(max = 50)
+        @Schema(example = "쿠팡")
         private String name;
     }
 
@@ -20,6 +22,7 @@ public class CategoryDtos {
         @NotNull
         private Long id;
         @Size(max = 50)
+        @Schema(example = "쿠팡")
         private String name;
         private Boolean isActive;
     }
