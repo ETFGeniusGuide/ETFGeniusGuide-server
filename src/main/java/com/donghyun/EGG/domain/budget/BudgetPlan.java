@@ -9,12 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.YearMonth;
 
 @Entity
-@Table(
-        name = "budget_plan",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "ux_budget_plan_member_month", columnNames = {"member_id"})
-        }
-)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class BudgetPlan {
 
